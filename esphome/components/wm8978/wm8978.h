@@ -3,9 +3,13 @@
 
 /* Taken from the wm8978-esp32 project: https://github.com/CelliesProjects/wm8978-esp32/
  * Copyright CelliesProjects and licensed under the terms of the MIT License
+ * adapted 2024 by h3ndrik for https://github.com/h3ndrik/esphome-wm8978
  */
 
 #include <stdio.h>
+
+namespace esphome {
+namespace wm8978 {
 
 #define WM8978_ADDR   0X1A  //WM8978��������ַ,�̶�Ϊ0X1A
 
@@ -472,3 +476,6 @@ bool WM8978::begin(const uint8_t sda, const uint8_t scl, const uint32_t frequenc
 
   return begin();
 }
+
+}  // namespace wm8978
+}  // namespace esphome
