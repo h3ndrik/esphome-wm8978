@@ -1,62 +1,54 @@
 #pragma once
 
 #include "esphome/core/component.h"
-#include "esphome/core/hal.h"
+#include "esphome/components/audio_dac/audio_dac.h"
 #include "esphome/components/i2c/i2c.h"
 
 namespace esphome {
 namespace wm8978 {
 
-class WM8978Component : public Component, public i2c::I2CDevice {
+class WM8978 : public audio_dac::AudioDac, public Component, public i2c::I2CDevice {
  public:
-  WM8978Component() = default;
+  /////////////////////////
+  // Component overrides //
+  /////////////////////////
 
-  /// Check i2c availability and setup masks
   void setup() override;
-/*  /// Helper function to read the value of a pin.
-  bool digital_read(uint8_t pin);
-  /// Helper function to write the value of a pin.
-  void digital_write(uint8_t pin, bool value);
-  /// Helper function to set the pin mode of a pin.
-  void pin_mode(uint8_t pin, gpio::Flags flags);
+  void dump_config() override;
 
-  float get_setup_priority() const override;
+  ////////////////////////
+  // AudioDac overrides //
+  ////////////////////////
 
-  void dump_config() override;*/
+  /// @brief Writes the volume out to the DAC
+  /// @param volume floating point between 0.0 and 1.0
+  /// @return True if successful and false otherwise
+  bool set_volume(float volume) override;
+
+  /// @brief Gets the current volume out from the DAC
+  /// @return floating point between 0.0 and 1.0
+  float volume() override;
+
+  /// @brief Disables mute for audio out
+  /// @return True if successful and false otherwise
+  bool set_mute_off() override { return this->set_mute_state_(false); }
+
+  /// @brief Enables mute for audio out
+  /// @return True if successful and false otherwise
+  bool set_mute_on() override { return this->set_mute_state_(true); }
+
+  bool is_muted() override { return this->is_muted_; }
 
  protected:
-/*  bool read_gpio_();
+  esphome::i2c::ErrorCode write_register_(uint8_t reg, uint16_t value);
 
-  bool write_gpio_();
+  /// @brief Mutes or unmutes the DAC audio out
+  /// @param mute_state True to mute, false to unmute
+  /// @return True if successful and false otherwise
+  bool set_mute_state_(bool mute_state);
 
-  /// Mask for the pin mode - 1 means output, 0 means input
-  uint16_t mode_mask_{0x00};
-  /// The mask to write as output state - 1 means HIGH, 0 means LOW
-  uint16_t output_mask_{0x00};
-  /// The state read in read_gpio_ - 1 means HIGH, 0 means LOW
-  uint16_t input_mask_{0x00};*/
+  float volume_{0};
 };
-
-/// Helper class to expose a WM8978 pin as an internal input GPIO pin.
-/*class WM8978GPIOPin : public GPIOPin {
- public:
-  void setup() override;
-  void pin_mode(gpio::Flags flags) override;
-  bool digital_read() override;
-  void digital_write(bool value) override;
-  std::string dump_summary() const override;
-
-  void set_parent(WM8978Component *parent) { parent_ = parent; }
-  void set_pin(uint8_t pin) { pin_ = pin; }
-  void set_inverted(bool inverted) { inverted_ = inverted; }
-  void set_flags(gpio::Flags flags) { flags_ = flags; }
-
- protected:
-  WM8978Component *parent_;
-  uint8_t pin_;
-  bool inverted_;
-  gpio::Flags flags_;
-};*/
 
 }  // namespace wm8978
 }  // namespace esphome
