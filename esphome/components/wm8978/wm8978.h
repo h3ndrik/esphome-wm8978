@@ -27,7 +27,7 @@ class WM8978 : public audio_dac::AudioDac, public Component, public i2c::I2CDevi
 
   /// @brief Gets the current volume out from the DAC
   /// @return floating point between 0.0 and 1.0
-  float volume() override;
+  float volume() override { return this->volume_; }
 
   /// @brief Disables mute for audio out
   /// @return True if successful and false otherwise
@@ -39,6 +39,9 @@ class WM8978 : public audio_dac::AudioDac, public Component, public i2c::I2CDevi
 
   bool is_muted() override { return this->is_muted_; }
 
+  bool set_mic_gain(float mic_gain);
+  float mic_gain() override { return this->mic_gain_; };
+
  protected:
   esphome::i2c::ErrorCode write_register_(uint8_t reg, uint16_t value);
 
@@ -48,6 +51,7 @@ class WM8978 : public audio_dac::AudioDac, public Component, public i2c::I2CDevi
   bool set_mute_state_(bool mute_state);
 
   float volume_{0};
+  float mic_gain_{0};
 };
 
 }  // namespace wm8978

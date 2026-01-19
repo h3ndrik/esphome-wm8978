@@ -32,7 +32,7 @@ void WM8978::setup() {
   this->write_register_(1, 0x1B);  // MICEN, BIASEN, VMIDSEL[1:0]=11 (50k)
 
   //6. Set L/ROUT1EN = 1 in register R2.
-  this->write_register_(2, 0x180); // ROUT1, LOUT1 enable (headphone)
+  this->write_register_(2, 0x1B0); // ROUT1, LOUT1 enable (headphone), BOOSTENR, BOOSTENL
 
   //7. Enable other mixers as required.
   // Explicitly set ADC input mixer settings
@@ -58,22 +58,21 @@ void WM8978::setup() {
   this->write_register_(49, 1<<1);    // TSDEN (thermal shutdown enable)
 
   // Enable DAC, ADC
-  this->write_register_(2, 0x1B0 | 3);
+  this->write_register_(2, 0x1B0 | 3<<2 | 3);
   this->write_register_(3, 0x6C | 3);  // Enable DACR & DACL
 
   // Enable microphone inputs
   this->write_register_(44, 0x33); // LINPUT1 and RINPUT1 enabled, +20dB boost
 
   // Input mixer, Set higher microphone gain for recording
-  this->write_register_(45, 0x138); // Left input PGA = +24dB
-  this->write_register_(46, 0x138); // Right input PGA = +24dB
+  this->set_mic_gain(24.0);
 
   // Configure EQ to reduce static - THIS IS KEY FOR REDUCING STATIC
-  this->write_register_(18, 0x12C | (0x3 << 5) | 8);  // EQ1 - 80Hz (bass): +2dB
-  this->write_register_(19, 0x2C | (0x0 << 5) | 8);   // EQ2 - 230Hz: -4dB (reduce mid-low noise)
-  this->write_register_(20, 0x2C | (0x0 << 5) | 8);   // EQ3 - 650Hz: -4dB (reduce mid noise)
-  this->write_register_(21, 0x2C | (0x3 << 5) | 4);   // EQ4 - 4.1kHz: +2dB (enhance clarity)
-  this->write_register_(22, 0x2C | (0x3 << 5) | 8);   // EQ5 - 11.7kHz: +2dB (enhance clarity)
+  //this->write_register_(18, 0x12C | (0x3 << 5) | 8);  // EQ1 - 80Hz (bass): +2dB
+  //this->write_register_(19, 0x2C | (0x0 << 5) | 8);   // EQ2 - 230Hz: -4dB (reduce mid-low noise)
+  //this->write_register_(20, 0x2C | (0x0 << 5) | 8);   // EQ3 - 650Hz: -4dB (reduce mid noise)
+  //this->write_register_(21, 0x2C | (0x3 << 5) | 4);   // EQ4 - 4.1kHz: +2dB (enhance clarity)
+  //this->write_register_(22, 0x2C | (0x3 << 5) | 8);   // EQ5 - 11.7kHz: +2dB (enhance clarity)
 
   // Configure output channels - enable DAC output
   this->write_register_(50, 1);  // Left DAC to left mixer
@@ -103,16 +102,14 @@ void WM8978::dump_config() {
 }
 
 bool WM8978::set_volume(float volume) {
-  volume = clamp(volume, 0.0f, 1.0f);
-  this->volume_ = volume;
-  uint8_t reg = remap<uint8_t, float>(volume, 0.0f, 1.0f, 0, 63);
-  return this->write_register_(52, reg);          // Left headphone volume
-  return this->write_register_(53, reg | 0x100);  // Right headphone volume + update
-  return this->write_register_(54, reg);          // Left speaker volume
-  return this->write_register_(55, reg | 0x100);  // Right speaker volume + update
+  this->volume_ = clamp(volume, 0.0f, 1.0f);
+  uint8_t reg = remap<uint8_t, float>(this->volume_, 0.0f, 1.0f, 0, 63);
+  this->write_register_(52, reg);          // Left headphone volume
+  this->write_register_(53, reg | 0x100);  // Right headphone volume + update
+  this->write_register_(54, reg);          // Left speaker volume
+  this->write_register_(55, reg | 0x100);  // Right speaker volume + update
+  return true
 }
-
-float WM8978::volume() { return this->volume_; }
 
 bool WM8978::set_mute_state_(bool mute_state) {
   this->is_muted_ = mute_state;
@@ -123,10 +120,19 @@ bool WM8978::set_mute_state_(bool mute_state) {
   }
 
   ESP_LOGV(TAG, "Setting WM8978_DAC_MUTE to %u (muted: %s)", reg, YESNO(mute_state));
-  return this->write_register_(52, reg); // LOUT1MUTE
-  return this->write_register_(53, reg); // ROUT1MUTE
-  return this->write_register_(54, reg); // LOUT2MUTE
-  return this->write_register_(55, reg); // ROUT2MUTE
+  this->write_register_(52, reg); // LOUT1MUTE
+  this->write_register_(53, reg); // ROUT1MUTE
+  this->write_register_(54, reg); // LOUT2MUTE
+  this->write_register_(55, reg); // ROUT2MUTE
+  return true
+}
+
+bool WM8978::set_mic_gain(float mic_gain) {
+  this->mic_gain_ = clamp<float>(mic_gain, -12.0f, 35.25f);
+  uint8_t reg = remap<uint8_t, float>(this->mic_gain_, -12.0f, 35.25f, 0, 63);
+  this->write_register_(45, reg); // Left input PGA
+  this->write_register_(46, reg | 0x100); // Right input PGA
+  return true;
 }
 
 esphome::i2c::ErrorCode WM8978::write_register_(uint8_t reg, uint16_t value) {
