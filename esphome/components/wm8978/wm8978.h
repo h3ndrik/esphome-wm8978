@@ -40,7 +40,7 @@ class WM8978 : public audio_dac::AudioDac, public Component, public i2c::I2CDevi
   bool is_muted() override { return this->is_muted_; }
 
   bool set_mic_gain(float mic_gain);
-  float mic_gain() override { return this->mic_gain_; };
+  float mic_gain() { return this->mic_gain_; };
 
  protected:
   esphome::i2c::ErrorCode write_register_(uint8_t reg, uint16_t value);

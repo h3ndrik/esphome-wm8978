@@ -21,7 +21,7 @@ void WM8978::setup() {
   //Power-up when NOT using the output 1.5x boost stage:
   //1. Turn on external power supplies. Wait for supply voltage to settle.
   //2. Mute all analogue outputs.
-  this->set_mute_on(true);
+  this->set_mute_on();
 
   //3. Set L/RMIXEN = 1 and DACENL/R = 1 in register R3.
   this->write_register_(3, 0x6C);  // LOUT2, ROUT2 enable (speaker), RMIX, LMIX enable
@@ -108,7 +108,7 @@ bool WM8978::set_volume(float volume) {
   this->write_register_(53, reg | 0x100);  // Right headphone volume + update
   this->write_register_(54, reg);          // Left speaker volume
   this->write_register_(55, reg | 0x100);  // Right speaker volume + update
-  return true
+  return true;
 }
 
 bool WM8978::set_mute_state_(bool mute_state) {
@@ -124,7 +124,7 @@ bool WM8978::set_mute_state_(bool mute_state) {
   this->write_register_(53, reg); // ROUT1MUTE
   this->write_register_(54, reg); // LOUT2MUTE
   this->write_register_(55, reg); // ROUT2MUTE
-  return true
+  return true;
 }
 
 bool WM8978::set_mic_gain(float mic_gain) {
