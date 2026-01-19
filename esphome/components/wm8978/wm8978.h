@@ -49,6 +49,7 @@ class WM8978 : public audio_dac::AudioDac, public Component, public i2c::I2CDevi
   /// @param mute_state True to mute, false to unmute
   /// @return True if successful and false otherwise
   bool set_mute_state_(bool mute_state);
+  bool set_sleep_state_(bool sleep_state);
 
   float volume_{0};
   float mic_gain_{0};

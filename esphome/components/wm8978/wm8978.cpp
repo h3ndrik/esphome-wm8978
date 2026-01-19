@@ -135,6 +135,11 @@ bool WM8978::set_mic_gain(float mic_gain) {
   return true;
 }
 
+bool WM8978::set_sleep_state_(bool sleep_state) {
+  this->write_register_(2, 0x1B0 | 3<<2 | 3 | sleep_state<<6);
+  return true;
+}
+
 esphome::i2c::ErrorCode WM8978::write_register_(uint8_t reg, uint16_t value) {
   uint8_t first = (reg << 1) | ((value >> 8) & 0X01);
   uint8_t second = value & 0xFF;
