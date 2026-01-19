@@ -140,6 +140,13 @@ bool WM8978::set_sleep_state_(bool sleep_state) {
   return true;
 }
 
+void WM8978::on_powerdown() {
+  this->set_mute_on();
+  this->write_register_(1, 0x00);
+  this->write_register_(2, 0x00);
+  this->write_register_(3, 0x00);
+}
+
 esphome::i2c::ErrorCode WM8978::write_register_(uint8_t reg, uint16_t value) {
   uint8_t first = (reg << 1) | ((value >> 8) & 0X01);
   uint8_t second = value & 0xFF;

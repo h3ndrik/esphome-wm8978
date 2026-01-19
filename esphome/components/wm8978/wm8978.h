@@ -15,6 +15,7 @@ class WM8978 : public audio_dac::AudioDac, public Component, public i2c::I2CDevi
 
   void setup() override;
   void dump_config() override;
+  void on_powerdown() override;
 
   ////////////////////////
   // AudioDac overrides //
