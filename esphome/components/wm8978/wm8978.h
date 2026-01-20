@@ -1,6 +1,7 @@
 #pragma once
 
 #include "esphome/core/component.h"
+#include "esphome/core/automation.h"
 #include "esphome/components/audio_dac/audio_dac.h"
 #include "esphome/components/i2c/i2c.h"
 
@@ -43,7 +44,7 @@ class WM8978 : public audio_dac::AudioDac, public Component, public i2c::I2CDevi
   bool set_mic_gain(float mic_gain);
   float mic_gain() { return this->mic_gain_; };
 
-  bool set_standby(bool enable);
+  bool set_sleep(bool enable);
 
  protected:
   esphome::i2c::ErrorCode write_register_(uint8_t reg, uint16_t value);
@@ -57,18 +58,14 @@ class WM8978 : public audio_dac::AudioDac, public Component, public i2c::I2CDevi
   float mic_gain_{0};
 };
 
-template<typename... Ts> class StandbySetStateAction : public Action<Ts...> {
+template<typename... Ts> class SleepAction : public Action<Ts...>, public Parented<WM8978> {
  public:
-  explicit StandbySetStateAction(WM8978 *ea) : ea_(ea) {}
-  TEMPLATABLE_VALUE(bool, state)
+  void play(const Ts &...x) override { this->parent_->set_sleep(true); }
+};
 
-  void play(Ts... x) override {
-    auto val = this->state_.value(x...);
-    this->ea_->set_standby(val);
-  }
-
- protected:
-  WM8978 *ea_;
+template<typename... Ts> class ResumeAction : public Action<Ts...>, public Parented<WM8978> {
+ public:
+  void play(const Ts &...x) override { this->parent_->set_sleep(false); }
 };
 
 }  // namespace wm8978

@@ -11,7 +11,8 @@ DEPENDENCIES = ["i2c"]
 wm8978_ns = cg.esphome_ns.namespace("wm8978")
 WM8978 = wm8978_ns.class_("WM8978", AudioDac, cg.Component, i2c.I2CDevice)
 
-StandbyAction = wm8978_ns.class_("StandbySetStateAction", automation.Action)
+SleepAction = wm8978_ns.class_("SleepAction", automation.Action)
+ResumeAction = wm8978_ns.class_("ResumeAction", automation.Action)
 
 CONFIG_SCHEMA = (
     cv.Schema(
@@ -28,19 +29,31 @@ CONFIG_SCHEMA = (
 
 
 @automation.register_action(
-    "wm8978.standby",
-    StandbyAction,
+    "wm8978.sleep",
+    SleepAction,
     cv.Schema(
         {
             cv.GenerateID(): cv.use_id(WM8978),
-            cv.Required(CONF_STATE): cv.boolean,
         },
     ),
 )
-async def wm8978_standby_set_state_to_code(config, action_id, template_arg, args):
+async def wm8978_sleep_to_code(config, action_id, template_arg, args):
     var = cg.new_Pvariable(action_id, template_arg)
     await cg.register_parented(var, config[CONF_ID])
-    cg.add(var.set_state(config[CONF_STATE]))
+    return var
+
+@automation.register_action(
+    "wm8978.resume",
+    ResumeAction,
+    cv.Schema(
+        {
+            cv.GenerateID(): cv.use_id(WM8978),
+        },
+    ),
+)
+async def wm8978_resume_to_code(config, action_id, template_arg, args):
+    var = cg.new_Pvariable(action_id, template_arg)
+    await cg.register_parented(var, config[CONF_ID])
     return var
 
 
