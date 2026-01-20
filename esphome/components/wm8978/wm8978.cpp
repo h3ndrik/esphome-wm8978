@@ -135,8 +135,8 @@ bool WM8978::set_mic_gain(float mic_gain) {
   return true;
 }
 
-bool WM8978::set_sleep_state_(bool sleep_state) {
-  this->write_register_(2, 0x1B0 | 3<<2 | 3 | sleep_state<<6);
+bool WM8978::set_standby(bool enable) {
+  this->write_register_(2, 0x1B0 | 3<<2 | 3 | enable<<6);
   return true;
 }
 

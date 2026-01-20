@@ -43,6 +43,8 @@ class WM8978 : public audio_dac::AudioDac, public Component, public i2c::I2CDevi
   bool set_mic_gain(float mic_gain);
   float mic_gain() { return this->mic_gain_; };
 
+  bool set_standby(bool enable);
+
  protected:
   esphome::i2c::ErrorCode write_register_(uint8_t reg, uint16_t value);
 
@@ -50,10 +52,23 @@ class WM8978 : public audio_dac::AudioDac, public Component, public i2c::I2CDevi
   /// @param mute_state True to mute, false to unmute
   /// @return True if successful and false otherwise
   bool set_mute_state_(bool mute_state);
-  bool set_sleep_state_(bool sleep_state);
 
   float volume_{0};
   float mic_gain_{0};
+};
+
+template<typename... Ts> class StandbySetStateAction : public Action<Ts...> {
+ public:
+  explicit StandbySetStateAction(WM8978 *ea) : ea_(ea) {}
+  TEMPLATABLE_VALUE(bool, state)
+
+  void play(Ts... x) override {
+    auto val = this->state_.value(x...);
+    this->ea_->set_standby(val);
+  }
+
+ protected:
+  WM8978 *ea_;
 };
 
 }  // namespace wm8978
