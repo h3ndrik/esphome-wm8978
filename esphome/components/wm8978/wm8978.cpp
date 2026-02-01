@@ -16,7 +16,7 @@ void WM8978::setup() {
     this->mark_failed();
     return;
   }
-  ESP_LOGD("WM8978", "WM8978 found at address 0x%02X", codec_addr);
+  ESP_LOGD("WM8978", "WM8978 found at address 0x%02X", this->address_);
 
   //Power-up when NOT using the output 1.5x boost stage:
   //1. Turn on external power supplies. Wait for supply voltage to settle.
